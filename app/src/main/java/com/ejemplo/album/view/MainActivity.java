@@ -19,25 +19,35 @@ import util.ResultListener;
 
 public class MainActivity extends AppCompatActivity {
 
+    RecyclerView recyclerView;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_main);
         super.onCreate(savedInstanceState);
-        AlbumController albumController = new AlbumController();
+        AlbumController albumController = new AlbumController(this);
+        recyclerView = (RecyclerView) findViewById(R.id.recyclerViewMain);
 
-        albumController.getAlbums(new ResultListener<List<Album>>() {
+
+        if(albumController.hayInternet()){
+        albumController.getAlbumsWEB(new ResultListener<List<Album>>() {
             @Override
             public void finish(List<Album> resultado) {
-                TextView textView = (TextView)findViewById(R.id.textView_hola);
-                String string = "";
-                for(Album item : resultado){
-                    string = string.concat(item.getTitle()+"; ");
-                }
-                textView.setText(string);
+                AdapterAlbums adapterAlbums = new AdapterAlbums(resultado, MainActivity.this);
+                recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false));
+                recyclerView.setHasFixedSize(true);
+                recyclerView.setAdapter(adapterAlbums);
             }
         });
 
-    }
+    } else {
+            AdapterAlbums adapterAlbums = new AdapterAlbums(albumController.getAlbumsDB(), MainActivity.this);
+            recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false));
+            recyclerView.setHasFixedSize(true);
+            recyclerView.setAdapter(adapterAlbums);
+            }
+        }
 }
 
 
